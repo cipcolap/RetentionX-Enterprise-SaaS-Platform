@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RetentionX Engine | Autonomous Churn Prevention Platform</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        },
+                        darkBg: '#090d16',
+                        cardBg: '#111726',
+                        borderBg: '#1e293b'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #090d16; color: #f8fafc; }
+        .glass-panel {
+            background: rgba(17, 23, 38, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-panel-hover:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        /* Custom range slider styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: #1e293b;
+            border-radius: 8px;
+            height: 6px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #6366f1;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+            transition: all 0.2s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: #818cf8;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #090d16; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-brand-500 selection:text-white">
+
+    <!-- Header Navbar -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-gray-800/80 px-4 lg:px-8 py-3.5">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <!-- Brand Logo -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-brand-500/20">
+                    <i class="fa-solid fa-bolt text-white text-xl"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-indigo-300">
+                        RetentionX <span class="text-brand-500 text-xs px-2 py-0.5 rounded-full bg-brand-500/10 border border-brand-500/20 font-semibold uppercase tracking-wide">Engine</span>
+                    </span>
+                    <p class="text-xs text-gray-400">Autonomous Churn Prevention & Unit Economics AI</p>
+                </div>
+            </div>
+
+            <!-- View Switcher Tabs -->
+            <div class="flex bg-gray-900/90 p-1 rounded-xl border border-gray-800">
+                <button id="btn-tab-mvp" onclick="switchTab('mvp')" class="px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center space-x-2 bg-brand-600 text-white shadow-md">
+                    <i class="fa-solid fa-gauge-high"></i>
+                    <span>MVP Product Platform</span>
+                </button>
+                <button id="btn-tab-pitch" onclick="switchTab('pitch')" class="px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center space-x-2 text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Investor Pitch Deck ($1M Seed)</span>
+                </button>
+            </div>
+
+            <!-- Live Status Indicator -->
+            <div class="hidden lg:flex items-center space-x-3">
+                <div class="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs px-3 py-1.5 rounded-full">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="font-medium">AI Agents Active</span>
+                </div>
+                <button onclick="triggerToast('Simulation synchronized with synthetic SaaS dataset')" class="text-gray-400 hover:text-white text-sm bg-gray-800/60 p-2 rounded-lg hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 flex-1">
+
+        <!-- =================================================================== -->
+        <!-- TAB 1: MVP PRODUCT PLATFORM VIEW                                   -->
+        <!-- =================================================================== -->
+        <div id="view-mvp" class="space-y-6">
+            
+            <!-- Top Metric Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <!-- Card 1: ARR -->
+                <div class="glass-panel p-4 rounded-2xl glass-panel-hover transition duration-200">
+                    <div class="flex items-center justify-between text-gray-400 text-xs font-medium mb-2">
+                        <span>ARR (RUN RATE)</span>
+                        <i class="fa-solid fa-sack-dollar text-brand-500"></i>
+                    </div>
+                    <div id="kpi-arr" class="text-2xl font-bold text-white">$1,440,000</div>
+                    <div class="mt-2 flex items-center text-xs text-emerald-400">
+                        <i class="fa-solid fa-arrow-trend-up mr-1"></i>
+                        <span>+14.2% MoM</span>
+                    </div>
+                </div>
+
+                <!-- Card 2: LTV/CAC Ratio -->
+                <div class="glass-panel p-4 rounded-2xl glass-panel-hover transition duration-200">
+                    <div class="flex items-center justify-between text-gray-400 text-xs font-medium mb-2">
+                        <span>LTV : CAC RATIO</span>
+                        <i class="fa-solid fa-scale-balanced text-indigo-400"></i>
+                    </div>
+                    <div id="kpi-ltv-cac" class="text-2xl font-bold text-emerald-400">4.8x</div>
+                    <div class="mt-2 flex items-center text-xs text-gray-400">
+                        <span>Target &gt; 3.0x</span>
+                        <span class="ml-auto text-emerald-400 font-semibold">Healthy</span>
+                    </div>
+                </div>
+
+                <!-- Card 3: Churn Rate -->
+                <div class="glass-panel p-4 rounded-2xl glass-panel-hover transition duration-200">
+                    <div class="flex items-center justify-between text-gray-400 text-xs font-medium mb-2">
+                        <span>MONTHLY CHURN</span>
+                        <i class="fa-solid fa-user-minus text-rose-400"></i>
+                    </div>
+                    <div id="kpi-churn" class="text-2xl font-bold text-rose-400">3.2%</div>
+                    <div class="mt-2 flex items-center text-xs text-rose-400">
+                        <i class="fa-solid fa-triangle-exclamation mr-1"></i>
+                        <span id="kpi-churn-sub">$38.4k MRR at Risk</span>
+                    </div>
+                </div>
+
+                <!-- Card 4: CAC Payback -->
+                <div class="glass-panel p-4 rounded-2xl glass-panel-hover transition duration-200">
+                    <div class="flex items-center justify-between text-gray-400 text-xs font-medium mb-2">
+                        <span>PAYBACK PERIOD</span>
+                        <i class="fa-solid fa-clock-rotate-left text-amber-400"></i>
+                    </div>
+                    <div id="kpi-payback" class="text-2xl font-bold text-white">7.5 mos</div>
+                    <div class="mt-2 flex items-center text-xs text-emerald-400">
+                        <i class="fa-solid fa-check mr-1"></i>
+                        <span>Benchmark: &lt; 12m</span>
+                    </div>
+                </div>
+
+                <!-- Card 5: Net Revenue Retention -->
+                <div class="glass-panel p-4 rounded-2xl glass-panel-hover transition duration-200">
+                    <div class="flex items-center justify-between text-gray-400 text-xs font-medium mb-2">
+                        <span>NET RETENTION (NRR)</span>
+                        <i class="fa-solid fa-chart-pie text-cyan-400"></i>
+                    </div>
+                    <div id="kpi-nrr" class="text-2xl font-bold text-cyan-400">114%</div>
+                    <div class="mt-2 flex items-center text-xs text-gray-400">
+                        <span>Expansion offsetting churn</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle Row: Interactive Simulator & Retention Benchmark Chart -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Unit Economics Simulator (5 Cols) -->
+                <div class="lg:col-span-5 glass-panel p-6 rounded-2xl flex flex-col justify-between space-y-5">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-sliders text-brand-500"></i>
+                                Unit Economics Simulator
+                            </h2>
+                            <span class="text-xs text-brand-400 bg-brand-500/10 px-2 py-1 rounded border border-brand-500/20">Real-Time ML Engine</span>
+                        </div>
+                        <p class="text-xs text-gray-400 mb-6">Adjust your SaaS parameters below to simulate unit economics projection and AI savings impact.</p>
+
+                        <!-- Controls Form -->
+                        <div class="space-y-4">
+                            <!-- Slider 1: Acquisition Budget -->
+                            <div>
+                                <div class="flex justify-between text-xs font-medium mb-1.5">
+                                    <span class="text-gray-300">Monthly Ad Budget</span>
+                                    <span id="val-budget" class="text-brand-400 font-bold">$30,000</span>
+                                </div>
+                                <input type="range" id="sim-budget" min="5000" max="100000" step="5000" value="30000" oninput="updateSimulation()" class="w-full">
+                            </div>
+
+                            <!-- Slider 2: CAC -->
+                            <div>
+                                <div class="flex justify-between text-xs font-medium mb-1.5">
+                                    <span class="text-gray-300">Customer Acquisition Cost (CAC)</span>
+                                    <span id="val-cac" class="text-brand-400 font-bold">$450</span>
+                                </div>
+                                <input type="range" id="sim-cac" min="100" max="1500" step="50" value="450" oninput="updateSimulation()" class="w-full">
+                            </div>
+
+                            <!-- Slider 3: Monthly Subscription Price -->
+                            <div>
+                                <div class="flex justify-between text-xs font-medium mb-1.5">
+                                    <span class="text-gray-300">ARPU (Monthly Price / User)</span>
+                                    <span id="val-arpu" class="text-brand-400 font-bold">$120</span>
+                                </div>
+                                <input type="range" id="sim-arpu" min="20" max="500" step="10" value="120" oninput="updateSimulation()" class="w-full">
+                            </div>
+
+                            <!-- Slider 4: Monthly Churn Rate -->
+                            <div>
+                                <div class="flex justify-between text-xs font-medium mb-1.5">
+                                    <span class="text-gray-300">Baseline Monthly Churn</span>
+                                    <span id="val-churn" class="text-rose-400 font-bold">3.2%</span>
+                                </div>
+                                <input type="range" id="sim-churn" min="0.5" max="10.0" step="0.1" value="3.2" oninput="updateSimulation()" class="w-full">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Simulator Output Box -->
+                    <div class="bg-gray-900/90 rounded-xl p-4 border border-gray-800 space-y-3">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-400 border-b border-gray-800 pb-2 flex justify-between">
+                            <span>Projection Impact</span>
+                            <span class="text-emerald-400"><i class="fa-solid fa-shield-halved mr-1"></i>With RetentionX</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                                <span class="text-xs text-gray-400 block">Projected LTV</span>
+                                <span id="sim-out-ltv" class="font-bold text-white text-base">$3,750</span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-400 block">Net Revenue Saved</span>
+                                <span id="sim-out-saved" class="font-bold text-emerald-400 text-base">+$18,400/mo</span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-400 block">Annual Churn Leak</span>
+                                <span id="sim-out-leak" class="font-bold text-rose-400">$460,800</span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-400 block">Target Payback</span>
+                                <span id="sim-out-payback" class="font-bold text-white">3.75 mos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Retention Curve Chart (7 Cols) -->
+                <div class="lg:col-span-7 glass-panel p-6 rounded-2xl flex flex-col justify-between">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-chart-area text-indigo-400"></i>
+                                Retention Curve vs. Industry Benchmark
+                            </h2>
+                            <p class="text-xs text-gray-400">Comparison of your current cohorts vs B2B SaaS Top Quartile</p>
+                        </div>
+                        <div class="flex items-center space-x-4 text-xs font-medium">
+                            <span class="flex items-center text-brand-400"><span class="w-3 h-3 rounded-full bg-brand-500 inline-block mr-1.5"></span>Your Retention</span>
+                            <span class="flex items-center text-emerald-400"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block mr-1.5"></span>Top 25% Benchmark</span>
+                        </div>
+                    </div>
+
+                    <div class="relative h-64 lg:h-72 w-full">
+                        <canvas id="retentionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cohort Retention Heatmap Section -->
+            <div class="glass-panel p-6 rounded-2xl">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-border-all text-purple-400"></i>
+                            Cohort Retention Heatmap (12 Months)
+                        </h2>
+                        <p class="text-xs text-gray-400">Percentage of active users remaining per user acquisition cohort</p>
+                    </div>
+                    <div class="flex items-center space-x-2 text-xs text-gray-400">
+                        <span>Legend:</span>
+                        <span class="px-2 py-0.5 rounded bg-emerald-500/30 text-emerald-300 font-medium">>80%</span>
+                        <span class="px-2 py-0.5 rounded bg-brand-500/30 text-brand-300 font-medium">50-80%</span>
+                        <span class="px-2 py-0.5 rounded bg-amber-500/30 text-amber-300 font-medium">30-50%</span>
+                        <span class="px-2 py-0.5 rounded bg-rose-500/30 text-rose-300 font-medium">&lt;30%</span>
+                    </div>
+                </div>
+
+                <!-- Heatmap Table Container -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left border-collapse">
+                        <thead>
+                            <tr class="text-gray-400 border-b border-gray-800 uppercase font-semibold text-[11px]">
+                                <th class="py-3 px-3">Cohort</th>
+                                <th class="py-3 px-2">Users</th>
+                                <th class="py-3 px-2 text-center">M0</th>
+                                <th class="py-3 px-2 text-center">M1</th>
+                                <th class="py-3 px-2 text-center">M2</th>
+                                <th class="py-3 px-2 text-center">M3</th>
+                                <th class="py-3 px-2 text-center">M4</th>
+                                <th class="py-3 px-2 text-center">M5</th>
+                                <th class="py-3 px-2 text-center">M6</th>
+                                <th class="py-3 px-2 text-center">M7</th>
+                                <th class="py-3 px-2 text-center">M8</th>
+                                <th class="py-3 px-2 text-center">M9</th>
+                                <th class="py-3 px-2 text-center">M10</th>
+                                <th class="py-3 px-2 text-center">M11</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cohort-heatmap-body" class="divide-y divide-gray-800/50">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Bottom Grid: ML Churn Risk Table & Agent Playbooks -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Churn Risk Account Table (8 Cols) -->
+                <div class="lg:col-span-8 glass-panel p-6 rounded-2xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-user-shield text-rose-400"></i>
+                                    High-Risk Accounts & SHAP Driver Analysis
+                                </h2>
+                                <p class="text-xs text-gray-400">Predictive ML scoring with explainable AI factor tags</p>
+                            </div>
+                            <button onclick="triggerToast('Re-evaluating ML risk models across all active accounts...')" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs rounded-lg transition border border-gray-700">
+                                Refresh ML Inference
+                            </button>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-xs text-left">
+                                <thead>
+                                    <tr class="text-gray-400 border-b border-gray-800 uppercase font-semibold text-[11px]">
+                                        <th class="py-3 px-2">Account</th>
+                                        <th class="py-3 px-2">ARR Value</th>
+                                        <th class="py-3 px-2">Churn Risk</th>
+                                        <th class="py-3 px-2">Top SHAP Drivers (Root Cause)</th>
+                                        <th class="py-3 px-2 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="risk-table-body" class="divide-y divide-gray-800/60">
+                                    <!-- Populated via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Autonomous AI Rescue Playbooks (4 Cols) -->
+                <div class="lg:col-span-4 glass-panel p-6 rounded-2xl flex flex-col justify-between space-y-4">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-robot text-cyan-400"></i>
+                                Agentic AI Playbooks
+                            </h2>
+                            <span class="text-xs bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2 py-0.5 rounded font-mono">AUTONOMOUS</span>
+                        </div>
+                        <p class="text-xs text-gray-400 mb-4">Automated workflows executed upon churn signal detection</p>
+
+                        <div class="space-y-3">
+                            <!-- Playbook 1 -->
+                            <div class="p-3 bg-gray-900/80 rounded-xl border border-gray-800 flex items-start space-x-3">
+                                <div class="p-2 bg-purple-500/10 text-purple-400 rounded-lg mt-0.5">
+                                    <i class="fa-solid fa-ticket-simple text-sm"></i>
+                                </div>
+                                <div class="flex-1 text-xs">
+                                    <div class="flex items-center justify-between font-semibold text-gray-200">
+                                        <span>Support Spike Rescue</span>
+                                        <span class="text-emerald-400 font-mono text-[10px]">Active</span>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mt-0.5">Triggers senior CSM ping & priority ticket routing when support tickets &gt; 3 in 7 days.</p>
+                                </div>
+                            </div>
+
+                            <!-- Playbook 2 -->
+                            <div class="p-3 bg-gray-900/80 rounded-xl border border-gray-800 flex items-start space-x-3">
+                                <div class="p-2 bg-amber-500/10 text-amber-400 rounded-lg mt-0.5">
+                                    <i class="fa-solid fa-tags text-sm"></i>
+                                </div>
+                                <div class="flex-1 text-xs">
+                                    <div class="flex items-center justify-between font-semibold text-gray-200">
+                                        <span>Auto Incentive Downsell</span>
+                                        <span class="text-emerald-400 font-mono text-[10px]">Active</span>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mt-0.5">Generates dynamic 15% annual discount offer if seat usage drops by over 50%.</p>
+                                </div>
+                            </div>
+
+                            <!-- Playbook 3 -->
+                            <div class="p-3 bg-gray-900/80 rounded-xl border border-gray-800 flex items-start space-x-3">
+                                <div class="p-2 bg-rose-500/10 text-rose-400 rounded-lg mt-0.5">
+                                    <i class="fa-solid fa-credit-card text-sm"></i>
+                                </div>
+                                <div class="flex-1 text-xs">
+                                    <div class="flex items-center justify-between font-semibold text-gray-200">
+                                        <span>Payment Failure Dunning</span>
+                                        <span class="text-emerald-400 font-mono text-[10px]">Active</span>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mt-0.5">Smart retry schedule + automated SMS/In-App prompt before account suspension.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="triggerToast('Executing custom Playbook builder...')" class="w-full py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-semibold transition flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Configure New AI Playbook</span>
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- TAB 2: INVESTOR PITCH DECK ($1M SEED) VIEW                          -->
+        <!-- =================================================================== -->
+        <div id="view-pitch" class="hidden space-y-6">
+            
+            <!-- Pitch Deck Controller Bar -->
+            <div class="glass-panel p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center space-x-3">
+                    <span class="text-xs font-bold text-brand-400 bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20">CONFIDENTIAL</span>
+                    <h2 class="text-base font-bold text-white">Seed Round Investment Deck ($1.0M Allocation)</h2>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="prevSlide()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-lg text-xs transition font-medium">
+                        <i class="fa-solid fa-chevron-left mr-1"></i> Prev
+                    </button>
+                    <span id="slide-indicator" class="text-xs text-gray-400 px-3 font-mono">Slide 1 of 6</span>
+                    <button onclick="nextSlide()" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs transition font-medium">
+                        Next <i class="fa-solid fa-chevron-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Slide 1: The Problem -->
+            <div class="pitch-slide glass-panel p-8 rounded-3xl min-h-[480px] flex flex-col justify-between" id="slide-1">
+                <div>
+                    <div class="text-xs font-bold text-rose-400 uppercase tracking-widest mb-2">01 / THE PROBLEM</div>
+                    <h1 class="text-3xl lg:text-4xl font-extrabold text-white mb-4">The $28 Billion Silent SaaS Revenue Leak</h1>
+                    <p class="text-gray-300 text-sm max-w-3xl leading-relaxed mb-8">
+                        B2B SaaS companies spend millions acquiring customers, only to lose <strong class="text-rose-400">20-30% of revenue annually</strong> due to unpredicted churn. Reactive surveys and manual customer success calls happen <em class="text-white">after</em> the cancellation decision is already made.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-gray-900/80 p-5 rounded-2xl border border-gray-800">
+                            <div class="text-3xl font-bold text-rose-400 mb-1">$28B+</div>
+                            <div class="text-xs text-gray-400 font-medium">Annual lost ARR globally from preventable customer churn.</div>
+                        </div>
+                        <div class="bg-gray-900/80 p-5 rounded-2xl border border-gray-800">
+                            <div class="text-3xl font-bold text-amber-400 mb-1">5x-25x</div>
+                            <div class="text-xs text-gray-400 font-medium">Higher cost to acquire a new customer than retaining an existing one.</div>
+                        </div>
+                        <div class="bg-gray-900/80 p-5 rounded-2xl border border-gray-800">
+                            <div class="text-3xl font-bold text-indigo-400 mb-1">82%</div>
+                            <div class="text-xs text-gray-400 font-medium">Of SaaS churned accounts showed clear behavioral warning signals 30 days prior.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-xs text-gray-500 pt-6 border-t border-gray-800 flex justify-between">
+                    <span>RetentionX Engine Seed Deck</span>
+                    <span>Problem Definition</span>
+                </div>
+            </div>
+
+            <!-- Slide 2: The Solution -->
+            <div class="pitch-slide glass-panel p-8 rounded-3xl min-h-[480px] flex flex-col justify-between hidden" id="slide-2">
+                <div>
+                    <div class="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2">02 / THE SOLUTION</div>
+                    <h1 class="text-3xl lg:text-4xl font-extrabold text-white mb-4">Autonomous AI Churn Prevention Engine</h1>
+                    <p class="text-gray-300 text-sm max-w-3xl leading-relaxed mb-8">
+                        RetentionX embeds into existing SaaS telemetry to detect microscopic churn signals in real-time, explain <strong class="text-brand-400">root-cause SHAP drivers</strong>, and trigger autonomous AI rescue playbooks <strong class="text-emerald-400">before</strong> customer cancellation occurs.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-gray-900/80 p-5 rounded-2xl border border-gray-800">
+                            <div class="w-10 h-10 rounded-xl bg-brand-500/20 text-brand-400 flex items-center justify-center mb-3 text-lg font-bold">1</div>
+                            <h3 class="text-white font-bold text-sm mb-1">Predictive ML Inference</h3>
+                            <p class="text-xs text-gray-400">Continuously scores account risk using CatBoost & Transformer models trained on telemetry.</p>
+                        </div>
+                        <div class="bg-gray-900/80 p-5 rounded-2xl border border-gray-800">
+                            <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center mb-3 text-lg font-bold">2</div>
+                            <h3 class="text-white font-bold text-sm mb-1">Explainable SHAP Drivers</h3>
+                            <p class="text-xs text-gray-400">Pinpoints exact churn causes (e.g., ticket latency +50%, login frequency drop).</p>
+                        </div>
+                        <div class="bg-gray-900/80 p-5 rounded-2xl border border-gray-800">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-3 text-lg font-bold">3</div>
+                            <h3 class="text-white font-bold text-sm mb-1">Agentic Playbook Execution</h3>
+                            <p class="text-xs text-gray-400">Automated discounts, CSM alerts, and tailored re-engagement workflows without manual labor.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-xs text-gray-500 pt-6 border-t border-gray-800 flex justify-between">
+                    <span>RetentionX Engine Seed Deck</span>
+                    <span>Core Platform Value</span>
+                </div>
+            </div>
+
+            <!-- Slide 3: Market Size -->
+            <div class="pitch-slide glass-panel p-8 rounded-3xl min-h-[480px] flex flex-col justify-between hidden" id="slide-3">
+                <div>
+                    <div class="text-xs font-bold text-cyan-400 uppercase tracking-widest mb-2">03 / MARKET OPPORTUNITY</div>
+                    <h1 class="text-3xl lg:text-4xl font-extrabold text-white mb-4">Massive Total Addressable Market (TAM)</h1>
+                    <p class="text-gray-300 text-sm max-w-3xl leading-relaxed mb-8">
+                        As the global B2B SaaS industry expands towards $300B+, retention tooling is shifting from static reporting to real-time automated execution.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                        <div class="bg-gradient-to-b from-gray-900 to-brand-950/40 p-6 rounded-2xl border border-brand-500/30">
+                            <div class="text-xs text-brand-400 font-bold uppercase mb-2">TAM (Total Addressable)</div>
+                            <div class="text-4xl font-extrabold text-white mb-2">$18.2 B</div>
+                            <div class="text-xs text-gray-400">Global Customer Retention & Revenue Intelligence Analytics</div>
+                        </div>
+                        <div class="bg-gradient-to-b from-gray-900 to-indigo-950/40 p-6 rounded-2xl border border-indigo-500/30">
+                            <div class="text-xs text-indigo-400 font-bold uppercase mb-2">SAM (Serviceable Addressable)</div>
+                            <div class="text-4xl font-extrabold text-white mb-2">$4.5 B</div>
+                            <div class="text-xs text-gray-400">Mid-Market & Enterprise B2B Subscription SaaS</div>
+                        </div>
+                        <div class="bg-gradient-to-b from-gray-900 to-cyan-950/40 p-6 rounded-2xl border border-cyan-500/30">
+                            <div class="text-xs text-cyan-400 font-bold uppercase mb-2">SOM (Serviceable Obtainable)</div>
+                            <div class="text-4xl font-extrabold text-white mb-2">$350 M</div>
+                            <div class="text-xs text-gray-400">High-growth US & EU B2B SaaS ($1M - $50M ARR)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-xs text-gray-500 pt-6 border-t border-gray-800 flex justify-between">
+                    <span>RetentionX Engine Seed Deck</span>
+                    <span>Market Size Analysis</span>
+                </div>
+            </div>
+
+            <!-- Slide 4: Business Model -->
+            <div class="pitch-slide glass-panel p-8 rounded-3xl min-h-[480px] flex flex-col justify-between hidden" id="slide-4">
+                <div>
+                    <div class="text-xs font-bold text-amber-400 uppercase tracking-widest mb-2">04 / BUSINESS MODEL</div>
+                    <h1 class="text-3xl lg:text-4xl font-extrabold text-white mb-4">Hybrid SaaS + Revenue Share Alignment</h1>
+                    <p class="text-gray-300 text-sm max-w-3xl leading-relaxed mb-8">
+                        We align directly with customer upside. Low barrier to entry platform fee combined with a performance success commission on verified saved ARR.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-gray-900/80 p-6 rounded-2xl border border-gray-800 space-y-4">
+                            <div class="flex items-center space-x-3 text-brand-400 font-bold text-lg">
+                                <i class="fa-solid fa-cube"></i>
+                                <span>Platform Subscription Tier</span>
+                            </div>
+                            <ul class="space-y-2 text-xs text-gray-300">
+                                <li class="flex items-center"><i class="fa-solid fa-check text-emerald-400 mr-2"></i> <strong>Growth:</strong> $499/mo (up to $2M tracked ARR)</li>
+                                <li class="flex items-center"><i class="fa-solid fa-check text-emerald-400 mr-2"></i> <strong>Scale:</strong> $1,299/mo (up to $10M tracked ARR)</li>
+                                <li class="flex items-center"><i class="fa-solid fa-check text-emerald-400 mr-2"></i> <strong>Enterprise:</strong> Custom Tier + Dedicated SLA</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-gray-900/80 p-6 rounded-2xl border border-gray-800 space-y-4">
+                            <div class="flex items-center space-x-3 text-emerald-400 font-bold text-lg">
+                                <i class="fa-solid fa-trophy"></i>
+                                <span>5% Saved Revenue Incentive</span>
+                            </div>
+                            <p class="text-xs text-gray-300 leading-relaxed">
+                                When our AI Agent successfully saves a customer flagged for churn (verified through payment renewal), RetentionX captures 5% of the rescued contract value.
+                            </p>
+                            <div class="text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-3 rounded-xl font-medium">
+                                Example: Rescuing a $50k ARR account = $2,500 performance bonus to RetentionX.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-xs text-gray-500 pt-6 border-t border-gray-800 flex justify-between">
+                    <span>RetentionX Engine Seed Deck</span>
+                    <span>Monetization Strategy</span>
+                </div>
+            </div>
+
+            <!-- Slide 5: Financial Projections -->
+            <div class="pitch-slide glass-panel p-8 rounded-3xl min-h-[480px] flex flex-col justify-between hidden" id="slide-5">
+                <div>
+                    <div class="text-xs font-bold text-purple-400 uppercase tracking-widest mb-2">05 / FINANCIAL TRAJECTORY</div>
+                    <h1 class="text-3xl lg:text-4xl font-extrabold text-white mb-4">Path to $10M ARR in 36 Months</h1>
+                    <p class="text-gray-300 text-sm max-w-3xl leading-relaxed mb-6">
+                        Rapid scaling powered by product-led trial onboarding and direct integration into Stripe/Chargebee subscription telemetry.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-gray-900/80 p-5 rounded-2xl border border-gray-800">
+                            <span class="text-xs font-bold text-gray-400 uppercase">Year 1 Target</span>
+                            <div class="text-3xl font-extrabold text-white my-2">$1.2M ARR</div>
+                            <p class="text-xs text-gray-400">45 Active Customers | $26k Avg ACV</p>
+                        </div>
+                        <div class="bg-gray-900/80 p-5 rounded-2xl border border-brand-500/30">
+                            <span class="text-xs font-bold text-brand-400 uppercase">Year 2 Target</span>
+                            <div class="text-3xl font-extrabold text-brand-400 my-2">$4.5M ARR</div>
+                            <p class="text-xs text-gray-400">140 Active Customers | $32k Avg ACV</p>
+                        </div>
+                        <div class="bg-gray-900/80 p-5 rounded-2xl border border-emerald-500/30">
+                            <span class="text-xs font-bold text-emerald-400 uppercase">Year 3 Target</span>
+                            <div class="text-3xl font-extrabold text-emerald-400 my-2">$10.8M ARR</div>
+                            <p class="text-xs text-gray-400">280 Active Customers | $38k Avg ACV</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-xs text-gray-500 pt-6 border-t border-gray-800 flex justify-between">
+                    <span>RetentionX Engine Seed Deck</span>
+                    <span>Financial Forecasting</span>
+                </div>
+            </div>
+
+            <!-- Slide 6: Use of Funds -->
+            <div class="pitch-slide glass-panel p-8 rounded-3xl min-h-[480px] flex flex-col justify-between hidden" id="slide-6">
+                <div>
+                    <div class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-2">06 / USE OF FUNDS ($1.0M)</div>
+                    <h1 class="text-3xl lg:text-4xl font-extrabold text-white mb-4">Milestones & Capital Allocation</h1>
+                    <p class="text-gray-300 text-sm max-w-3xl leading-relaxed mb-6">
+                        We are raising $1,000,000 Seed capital to expand engineering velocity and execute Go-To-Market expansion.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div class="bg-gray-900/80 p-5 rounded-2xl border border-gray-800">
+                            <div class="text-2xl font-bold text-brand-400 mb-1">60% ($600k)</div>
+                            <div class="text-xs font-semibold text-white mb-2">AI R&D & Engineering</div>
+                            <p class="text-xs text-gray-400">Expand ML pipeline, automated LLM playbooks, and deep SHAP analytics integrations.</p>
+                        </div>
+                        <div class="bg-gray-900/80 p-5 rounded-2xl border border-gray-800">
+                            <div class="text-2xl font-bold text-purple-400 mb-1">25% ($250k)</div>
+                            <div class="text-xs font-semibold text-white mb-2">Go-To-Market & Sales</div>
+                            <p class="text-xs text-gray-400">Outbound enterprise sales, growth marketing, and developer partner ecosystem.</p>
+                        </div>
+                        <div class="bg-gray-900/80 p-5 rounded-2xl border border-gray-800">
+                            <div class="text-2xl font-bold text-cyan-400 mb-1">15% ($150k)</div>
+                            <div class="text-xs font-semibold text-white mb-2">Operations & Security</div>
+                            <p class="text-xs text-gray-400">SOC2 Type II compliance, legal framework, and infrastructure scalability.</p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-brand-600/10 border border-brand-500/30 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div>
+                            <div class="text-sm font-bold text-white">Interested in joining our Seed Round?</div>
+                            <div class="text-xs text-gray-400">Request complete data room, cap table, and technical architecture specs.</div>
+                        </div>
+                        <button onclick="triggerToast('Investment inquiry logged. Team will contact you shorty!')" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-brand-500/20 whitespace-nowrap">
+                            Contact Founders
+                        </button>
+                    </div>
+                </div>
+
+                <div class="text-xs text-gray-500 pt-6 border-t border-gray-800 flex justify-between">
+                    <span>RetentionX Engine Seed Deck</span>
+                    <span>Fundraise & Next Steps</span>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass-panel border-t border-gray-800 py-4 px-4 lg:px-8 mt-12 text-xs text-gray-500">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-bolt text-brand-500"></i>
+                <span class="font-semibold text-gray-300">RetentionX Engine v2.4</span>
+                <span>— Autonomous Churn Intelligence</span>
+            </div>
+            <div>
+                <span>Production Demo Environment &bull; React UI/UX System &bull; Fast Execution Engine</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // --- DATA STATE ---
+        let currentSlide = 1;
+        const totalSlides = 6;
+        let chartInstance = null;
+
+        // Mock Cohort Data (12 Months M0-M11)
+        const cohortData = [
+            { name: "Jan 2024", users: 1240, retention: [100, 88, 76, 68, 62, 58, 55, 52, 50, 48, 47, 45] },
+            { name: "Feb 2024", users: 1420, retention: [100, 86, 74, 65, 60, 56, 53, 50, 48, 46, 44, null] },
+            { name: "Mar 2024", users: 1180, retention: [100, 89, 78, 70, 64, 60, 57, 54, 51, 49, null, null] },
+            { name: "Apr 2024", users: 1560, retention: [100, 85, 72, 63, 58, 54, 50, 47, 45, null, null, null] },
+            { name: "May 2024", users: 1680, retention: [100, 91, 80, 72, 67, 63, 59, 56, null, null, null, null] },
+            { name: "Jun 2024", users: 1890, retention: [100, 90, 81, 74, 69, 65, 61, null, null, null, null, null] },
+            { name: "Jul 2024", users: 2100, retention: [100, 92, 83, 76, 71, 67, null, null, null, null, null, null] },
+            { name: "Aug 2024", users: 1950, retention: [100, 87, 75, 67, 61, null, null, null, null, null, null, null] },
+        ];
+
+        // Mock Churn Risk Accounts
+        const riskAccounts = [
+            { name: "Acme Cloud Corp", arr: "$48,000", risk: 87, badge: "High", drivers: ["Support Spike +45%", "Usage Drop -60%", "Payment Retry"] },
+            { name: "Nexus Fintech Solutions", arr: "$36,000", risk: 74, badge: "High", drivers: ["Admin Inactive 14d", "Seats Decreased -30%"] },
+            { name: "Apex Data Systems", arr: "$24,000", risk: 52, badge: "Medium", drivers: ["API Latency Error", "NPS Score Drop"] },
+            { name: "Vortex Software", arr: "$18,500", risk: 48, badge: "Medium", drivers: ["License Unassigned", "Billing Inquiry"] },
+            { name: "Starlight Digital", arr: "$64,000", risk: 22, badge: "Low", drivers: ["Feature Request Delay"] },
+        ];
+
+        // --- APP INITIALIZATION ---
+        window.onload = function() {
+            renderCohortHeatmap();
+            renderRiskTable();
+            initRetentionChart();
+            updateSimulation();
+        };
+
+        // --- TAB SWITCHING ---
+        function switchTab(tab) {
+            const mvpView = document.getElementById('view-mvp');
+            const pitchView = document.getElementById('view-pitch');
+            const btnMvp = document.getElementById('btn-tab-mvp');
+            const btnPitch = document.getElementById('btn-tab-pitch');
+
+            if (tab === 'mvp') {
+                mvpView.classList.remove('hidden');
+                pitchView.classList.add('hidden');
+                btnMvp.className = "px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center space-x-2 bg-brand-600 text-white shadow-md";
+                btnPitch.className = "px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center space-x-2 text-gray-400 hover:text-white";
+            } else {
+                mvpView.classList.add('hidden');
+                pitchView.classList.remove('hidden');
+                btnPitch.className = "px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center space-x-2 bg-brand-600 text-white shadow-md";
+                btnMvp.className = "px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center space-x-2 text-gray-400 hover:text-white";
+            }
+        }
+
+        // --- PITCH DECK SLIDE CONTROLLER ---
+        function updateSlideDisplay() {
+            document.querySelectorAll('.pitch-slide').forEach(slide => slide.classList.add('hidden'));
+            document.getElementById(`slide-${currentSlide}`).classList.remove('hidden');
+            document.getElementById('slide-indicator').innerText = `Slide ${currentSlide} of ${totalSlides}`;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateSlideDisplay();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlideDisplay();
+            }
+        }
+
+        // --- SIMULATION CALCULATOR ---
+        function updateSimulation() {
+            const budget = parseFloat(document.getElementById('sim-budget').value);
+            const cac = parseFloat(document.getElementById('sim-cac').value);
+            const arpu = parseFloat(document.getElementById('sim-arpu').value);
+            const churnPct = parseFloat(document.getElementById('sim-churn').value) / 100;
+
+            // Format Labels
+            document.getElementById('val-budget').innerText = `$${budget.toLocaleString()}`;
+            document.getElementById('val-cac').innerText = `$${cac.toLocaleString()}`;
+            document.getElementById('val-arpu').innerText = `$${arpu.toLocaleString()}`;
+            document.getElementById('val-churn').innerText = `${(churnPct * 100).toFixed(1)}%`;
+
+            // Core Calculations
+            const newUsersPerMonth = budget / cac;
+            const ltv = arpu / churnPct;
+            const ltvCac = ltv / cac;
+            const paybackMonths = cac / arpu;
+            
+            // Estimated ARR from acquired base
+            const estArr = (newUsersPerMonth * arpu * 12) / (churnPct * 12);
+            const annualChurnLeak = estArr * churnPct;
+            
+            // Saved revenue assuming RetentionX 40% churn reduction
+            const savedMonthlyRev = (newUsersPerMonth * arpu) * 0.40;
+
+            // Update UI KPI elements
+            document.getElementById('sim-out-ltv').innerText = `$${Math.round(ltv).toLocaleString()}`;
+            document.getElementById('sim-out-saved').innerText = `+$${Math.round(savedMonthlyRev).toLocaleString()}/mo`;
+            document.getElementById('sim-out-leak').innerText = `$${Math.round(annualChurnLeak).toLocaleString()}`;
+            document.getElementById('sim-out-payback').innerText = `${paybackMonths.toFixed(1)} mos`;
+
+            document.getElementById('kpi-ltv-cac').innerText = `${ltvCac.toFixed(1)}x`;
+            document.getElementById('kpi-payback').innerText = `${paybackMonths.toFixed(1)} mos`;
+            document.getElementById('kpi-churn').innerText = `${(churnPct * 100).toFixed(1)}%`;
+            document.getElementById('kpi-arr').innerText = `$${Math.round(estArr).toLocaleString()}`;
+
+            // Update Chart Dataset dynamically if initialized
+            if (chartInstance) {
+                const updatedCurve = [100];
+                let current = 100;
+                for(let i=1; i<12; i++) {
+                    current = current * (1 - churnPct * 0.9);
+                    updatedCurve.push(Math.round(current));
+                }
+                chartInstance.data.datasets[0].data = updatedCurve;
+                chartInstance.update();
+            }
+        }
+
+        // --- COHORT HEATMAP RENDERER ---
+        function renderCohortHeatmap() {
+            const tbody = document.getElementById('cohort-heatmap-body');
+            tbody.innerHTML = '';
+
+            cohortData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-800/40 transition";
+
+                let html = `
+                    <td class="py-2.5 px-3 font-semibold text-white">${row.name}</td>
+                    <td class="py-2.5 px-2 text-gray-400 font-mono">${row.users.toLocaleString()}</td>
+                `;
+
+                for (let i = 0; i < 12; i++) {
+                    const val = row.retention[i];
+                    if (val === null || val === undefined) {
+                        html += `<td class="py-2.5 px-2 text-center text-gray-700 font-mono">-</td>`;
+                    } else {
+                        let colorClass = "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                        if (val < 50) colorClass = "bg-rose-500/20 text-rose-300 border border-rose-500/30";
+                        else if (val < 65) colorClass = "bg-amber-500/20 text-amber-300 border border-amber-500/30";
+                        else if (val < 80) colorClass = "bg-brand-500/20 text-brand-300 border border-brand-500/30";
+
+                        html += `<td class="py-2 px-1 text-center"><span class="px-2 py-1 rounded font-mono font-medium ${colorClass} inline-block w-full">${val}%</span></td>`;
+                    }
+                }
+
+                tr.innerHTML = html;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- RISK ACCOUNTS TABLE RENDERER ---
+        function renderRiskTable() {
+            const tbody = document.getElementById('risk-table-body');
+            tbody.innerHTML = '';
+
+            riskAccounts.forEach((acc, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-800/40 transition";
+
+                let badgeColor = "bg-rose-500/10 text-rose-400 border-rose-500/30";
+                if (acc.badge === 'Medium') badgeColor = "bg-amber-500/10 text-amber-400 border-amber-500/30";
+                if (acc.badge === 'Low') badgeColor = "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+
+                let driverTags = acc.drivers.map(d => `<span class="bg-gray-800 text-gray-300 border border-gray-700 px-2 py-0.5 rounded text-[10px] font-medium mr-1.5">${d}</span>`).join('');
+
+                tr.innerHTML = `
+                    <td class="py-3 px-2 font-bold text-white">${acc.name}</td>
+                    <td class="py-3 px-2 font-mono text-gray-300">${acc.arr}</td>
+                    <td class="py-3 px-2">
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${badgeColor}">${acc.risk}% Risk</span>
+                        </div>
+                    </td>
+                    <td class="py-3 px-2">${driverTags}</td>
+                    <td class="py-3 px-2 text-right">
+                        <button onclick="rescueAccount('${acc.name}')" class="px-3 py-1 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-[11px] font-semibold transition shadow-md shadow-brand-500/20">
+                            Execute Rescue
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function rescueAccount(name) {
+            triggerToast(`🤖 AI Agent triggered for ${name}: Personalized discount & priority ticket generated!`);
+        }
+
+        // --- CHART.JS INTEGRATION ---
+        function initRetentionChart() {
+            const ctx = document.getElementById('retentionChart').getContext('2d');
+            
+            const gradientBrand = ctx.createLinearGradient(0, 0, 0, 300);
+            gradientBrand.addColorStop(0, 'rgba(99, 102, 241, 0.4)');
+            gradientBrand.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
+
+            const gradientBench = ctx.createLinearGradient(0, 0, 0, 300);
+            gradientBench.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
+            gradientBench.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['M0', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11'],
+                    datasets: [
+                        {
+                            label: 'Your Retention',
+                            data: [100, 88, 76, 68, 62, 58, 55, 52, 50, 48, 47, 45],
+                            borderColor: '#6366f1',
+                            backgroundColor: gradientBrand,
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.35,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#818cf8'
+                        },
+                        {
+                            label: 'Top 25% SaaS Benchmark',
+                            data: [100, 92, 85, 80, 76, 73, 71, 69, 68, 66, 65, 64],
+                            borderColor: '#10b981',
+                            backgroundColor: gradientBench,
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: true,
+                            tension: 0.35,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: '#111726',
+                            borderColor: '#1e293b',
+                            borderWidth: 1,
+                            titleColor: '#fff',
+                            bodyColor: '#cbd5e1'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#64748b', font: { size: 11 } }
+                        },
+                        y: {
+                            min: 0,
+                            max: 100,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { 
+                                color: '#64748b', 
+                                font: { size: 11 },
+                                callback: function(value) { return value + '%'; }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- TOAST NOTIFICATIONS ---
+        function triggerToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = "pointer-events-auto bg-gray-900 border border-brand-500/40 text-white text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-3 transition transform translate-y-2 opacity-0 duration-300";
+            toast.innerHTML = `
+                <div class="text-brand-400"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="font-medium">${message}</div>
+            `;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
