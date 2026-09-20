@@ -1,37 +1,40 @@
-# RetentionX Engine 🚀
-> Autonomous Revenue Loss Prevention & Churn Analytics Platform for B2B SaaS
+# 📊 RetentionX — SaaS Churn Analytics & Unit Economics Engine
 
-RetentionX Engine is an enterprise-grade Micro-SaaS platform designed to predict customer churn, optimize unit economics ($LTV$, $CAC$, $Payback$), and trigger automated AI-driven rescue workflows before users cancel their subscriptions.
+**RetentionX** — это сквозная аналитическая платформа для подписочных сервисов (SaaS/Subscription Business). Продукт объединяет когортный анализ удержания (Retention), расчёт показателей юнит-экономики и машинное обучение для прогнозирования оттока клиентов (Churn Prediction) на ранней стадии.
 
----
-
-## Key Features
-
-* **Interactive Unit Economics Simulator:** Real-time $LTV$, $CAC$, and $ARR$ forecasting with dynamic slider adjustments.
-* **Cohort Retention Matrix:** Color-coded $M0 \dots M12$ retention heatmaps and retention curve analysis.
-* **ML Churn Predictor & SHAP Factors:** Machine learning classification (CatBoost/XGBoost) with explicit risk attribution.
-* **Autonomous AI Playbooks:** Automated agentic rescue workflows (discounts, VIP concierge, support escalations).
-* **Gemini API Integration:** AI-generated strategic retention advisories tailored to live financial metrics.
-* **$1M Investor Pitch Deck:** Built-in interactive pitch deck for fundraising and demonstration.
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.110.0-009688.svg)
+![Scikit-Learn](https://img.shields.io/badge/ML-Scikit--Learn%20%2F%20CatBoost-orange.svg)
 
 ---
 
-## Tech Stack
+## 🚀 Ключевые возможности
 
-* **Frontend:** React, Tailwind CSS, Recharts, Lucide Icons, Vite
-* **Backend:** Python 3.10+, FastAPI, Pandas, NumPy, CatBoost, SHAP
-* **AI Engine:** Google Gemini API (`@google/genai`)
+* **Product Analytics & Cohorts:** Автоматическое построение когортных матриц Retention Rate по месяцам.
+* **Unit Economics Calculator:** Моделирование LTV, CAC, ARPU и расчет коэффициента здоровья экономики ($LTV/CAC \ge 3.0$).
+* **ML Churn Prediction Engine:** Классификатор факторов риска оттока на основе машинного обучения.
+* **Risk Profiling (XAI):** Выделение ключевых паттернов ухода клиентов (неактивность, тикеты поддержки, падение активности) для таргетированного маркетинга.
+* **Interactive Dashboard:** Динамический интерфейс с живой фильтрацией клиентов группы риска и выгрузкой отчетов.
 
 ---
 
-## Quick Start
+## 🏗️ Архитектура системы
 
-### 1. Frontend Setup
-```bash
-# Clone the repository
-git clone [https://github.com/your-username/retentionx-engine.git](https://github.com/your-username/retentionx-engine.git)
-cd retentionx-engine
+Проект построен по сервисной архитектуре и разделен на фронтенд и бэкенд:
 
-# Install dependencies & run locally
-npm install
-npm run dev
+```text
+               ┌────────────────────────┐
+               │    Frontend (Client)   │
+               │ HTML5 / Tailwind / JS  │
+               └───────────┬────────────┘
+                           │  HTTP / REST API (fetch)
+                           ▼
+               ┌────────────────────────┐
+               │   FastAPI Backend API  │
+               └─────┬────────────┬─────┘
+                     │            │
+  ┌──────────────────┴──┐      ┌──┴──────────────────┐
+  │  ML Model (Churn)   │      │ Database / SQL      │
+  │ Scikit-Learn/CatBoost │      │ PostgreSQL (Schema) │
+  └─────────────────────┘      └─────────────────────┘
